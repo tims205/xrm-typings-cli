@@ -1,6 +1,6 @@
 {
   "name": "@timsturgeon/xrmtypings",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "module",
   "bin": {
     "xrmtypings": "./dist/index.js"
@@ -13,6 +13,11 @@
   "keywords": ["Dataverse", "Xrm", "Typings", "FormContext"],
   "author": "Tim Sturgeon",
   "license": "MIT",
+  "homepage": "https://github.com/tims205/xrm-typings-cli/",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/tims205/xrm-typings-cli/"
+  },
   "description": "Command line tool to generate d.ts files for Dataverse tables to use when writing client side form scripts.",
   "devDependencies": {
     "@types/express": "^5.0.0",
