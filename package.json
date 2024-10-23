@@ -1,0 +1,30 @@
+{
+  "name": "@timsturgeon/xrmtypings",
+  "version": "0.0.7",
+  "type": "module",
+  "bin": {
+    "xrmtypings": "./dist/index.js"
+  },
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["Dataverse", "Xrm", "Typings", "FormContext"],
+  "author": "Tim Sturgeon",
+  "license": "MIT",
+  "description": "Command line tool to generate d.ts files for Dataverse tables to use when writing client side form scripts.",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.5",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@azure/msal-node": "^2.15.0",
+    "commander": "^12.1.0",
+    "dts-dom": "^3.7.0",
+    "open": "^10.1.0",
+    "express": "^4.21.1"
+  }
+}
