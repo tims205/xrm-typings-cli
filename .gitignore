@@ -2,3 +2,6 @@ node_modules
 dist
 DEVREADME.md
 typings
+constants
+myconstantsfolder
+myoutputfolder

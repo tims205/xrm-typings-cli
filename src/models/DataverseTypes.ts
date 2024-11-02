@@ -137,3 +137,8 @@ export interface IOptionValue {
     name: string;
     value: number;
 }
+
+export interface RetrieveMultipleResponse {
+    "@odata.context": string,
+    value: any[]
+}
