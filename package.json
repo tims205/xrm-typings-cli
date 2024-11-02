@@ -1,6 +1,6 @@
 {
   "name": "@timsturgeon/xrmtypings",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "type": "module",
   "bin": {
     "xrmtypings": "./dist/index.js"
@@ -8,9 +8,15 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsc -w",
+    "lint": "eslint --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["Dataverse", "Xrm", "Typings", "FormContext"],
+  "keywords": [
+    "Dataverse",
+    "Xrm",
+    "Typings",
+    "FormContext"
+  ],
   "author": "Tim Sturgeon",
   "license": "MIT",
   "homepage": "https://github.com/tims205/xrm-typings-cli/",
@@ -20,16 +26,23 @@
   },
   "description": "Command line tool to generate d.ts files for Dataverse tables to use when writing client side form scripts.",
   "devDependencies": {
+    "@eslint/js": "^9.14.0",
     "@types/express": "^5.0.0",
     "@types/node": "^22.7.5",
     "@types/uuid": "^10.0.0",
-    "typescript": "^5.6.3"
+    "@typescript-eslint/eslint-plugin": "^8.12.2",
+    "@typescript-eslint/parser": "^8.12.2",
+    "eslint": "^9.14.0",
+    "globals": "^15.11.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.12.2"
   },
   "dependencies": {
     "@azure/msal-node": "^2.15.0",
     "commander": "^12.1.0",
     "dts-dom": "^3.7.0",
-    "open": "^10.1.0",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "open": "^10.1.0"
   }
 }
