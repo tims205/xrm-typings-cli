@@ -73,7 +73,7 @@ program
     "-p --publisherPrefix <string>",
     "Generate constants for all entities with this Publisher Prefix"
   )
-  .option("-d --outputDirectory <string>", "Output directory", "constants")
+  .option("-d --outputDirectory <string>", "Output directory", "typings")
   .option("-s, --separator <char>", "separator character", ",")
 
   .option(
