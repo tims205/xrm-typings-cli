@@ -27,7 +27,7 @@ program
     "-p --publisherPrefix <string>",
     "Generate typings for all entities with this Publisher Prefix"
   )
-  .option("-d --outputDirectory <string>", "Output directory", "typings")
+  .option("-d --outputDirectory <string>", "Output directory", "constants")
   .option("-s, --separator <char>", "separator character", ",")
   .option(
     "-a, --appId <string>",
@@ -58,7 +58,10 @@ program
     await gen.Connect();
 
     await gen.GenerateRecordConstants();
-  });
+  })
+  .description(
+    "Generate constants for Dataverse records used as configuration or reference data."
+  );
 
 program
   .command("generate")
