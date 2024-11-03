@@ -1,4 +1,5 @@
 # xrmtypings
+
 A command line tool for generating typings for Dataverse entities.
 
 Source code has been used and adapted from the brilliant Dataverse DevTools Visual Studio Code Extension:
@@ -12,6 +13,7 @@ In a command prompt run:
 `npm install -g @timsturgeon/xrmtypings`
 
 # Example Usage
+
 ## Generate Typings
 
 Generate typings for the account and contact, and all other entities with a publisher prefix of 'tim' in a particular environment:
@@ -26,14 +28,17 @@ Inside your Dataverse TypeScript project run:
 
 When getting form context cast it to a particular type to access typings and use intellisense in your IDE.
 
-```typescript 
+```typescript
+export async function onLoad(
+  context: Xrm.Events.LoadEventContext
+): Promise<void> {
+  // Cast the form context to the type you are working with
+  const formContext: Xrm.Account = context.getFormContext();
 
-export async function onLoad(context: Xrm.Events.LoadEventContext) : Promise<void> {
-    // Cast the form context to the type you are working with
-    const formContext: Xrm.Account = context.getFormContext();
-
-    // Typings are then provided when working with form attributes and controls
-    const categoryCode = formContext.getAttribute("accountcategorycode").getValue();
+  // Typings are then provided when working with form attributes and controls
+  const categoryCode = formContext
+    .getAttribute("accountcategorycode")
+    .getValue();
 }
 ```
 
@@ -46,16 +51,18 @@ The example below will generate d.ts files that add all instances of the 'pub_cu
 `xrmtypings constants", "-e pub_customerregion", "-o https://ORG.crm.dynamics.com/", "-n Tim"`
 
 ### Using Constants
+
 When getting values from Lookup attributes the .id value can then be compared to the appropriate enum.
 
 ```typescript
-const customerRegion = formContext.getAttribute("pub_customerregionid").getValue()?.[0];
+const customerRegion = formContext
+  .getAttribute("pub_customerregionid")
+  .getValue()?.[0];
 
-    if (customerType?.id === Tim.pub_customerregion_Constants.North) {
-        ///
-    }
+if (customerRegion?.id === Tim.pub_customerregion_Constants.North) {
+  ///
+}
 ```
-
 
 See all command line flags
 
