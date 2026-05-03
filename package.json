@@ -39,7 +39,7 @@
     "typescript-eslint": "^8.12.2"
   },
   "dependencies": {
-    "@azure/msal-node": "^5.1.5",
+    "@azure/msal-node": "^2.15.0",
     "commander": "^12.1.0",
     "dts-dom": "^3.7.0",
     "express": "^4.21.1",
