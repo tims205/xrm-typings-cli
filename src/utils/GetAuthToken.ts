@@ -37,7 +37,7 @@ export async function GenerateAuthToken(
     redirectUri: `http://localhost:${generateAuthRequest.localhostPort}`,
     codeChallenge: challenge, // PKCE code challenge
     codeChallengeMethod: "S256", // PKCE code challenge method
-    PromptValue: PromptValue.SELECT_ACCOUNT,
+    prompt: PromptValue.SELECT_ACCOUNT
   };
 
   const authCodeUrl = await pca.getAuthCodeUrl(authCodeUrlParameters);
@@ -58,7 +58,7 @@ export async function GenerateAuthToken(
     codeVerifier: verifier, // PKCE code verifier
     scopes: [`${generateAuthRequest.orgUrl}/.default`],
     redirectUri: `http://localhost:${generateAuthRequest.localhostPort}`,
-    PromptValue: PromptValue.SELECT_ACCOUNT,
+    prompt: PromptValue.SELECT_ACCOUNT
   };
 
   const token = await pca.acquireTokenByCode(tokenRequest);
