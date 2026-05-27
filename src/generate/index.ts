@@ -20,8 +20,7 @@ import { constants } from "fs/promises";
 const typingNamespace: string = "Xrm";
 const typingInterface: string = "EventContext";
 const typingMethod: string = "getFormContext";
-const typingOmitAttribute = "Omit<FormContext, 'getAttribute'>";
-const typingOmitControl = "Omit<FormContext, 'getControl'>";
+const typingOmitBoth = "Omit<FormContext, 'getAttribute' | 'getControl'>";
 const xrmAttribute = "Attributes.Attribute";
 const xrmControl = "Controls.StandardControl";
 
@@ -104,9 +103,6 @@ export class TypingsGenerator {
     const attributes = await this.getEntityAttributes(entityLogicalName);
 
     const pascalizedEntityName = pascalize(entityLogicalName);
-    const interfaceAttributes = dom.create.interface(
-      `${pascalizedEntityName}Attributes`
-    );
     const nsXrm = dom.create.namespace(typingNamespace);
     const nsEnum = dom.create.namespace(`${pascalizedEntityName}Enum`);
 
@@ -119,10 +115,13 @@ export class TypingsGenerator {
       tripleSlashDirectives: refPath,
     };
 
+    const interfaceAttributes = dom.create.interface(
+      `${pascalizedEntityName}Attributes`
+    );
     const typeEntity = dom.create.alias(
       pascalizedEntityName,
       dom.create.namedTypeReference(
-        `${typingOmitAttribute} & ${typingOmitControl} & ${interfaceAttributes.name}`
+        `${typingOmitBoth} & ${interfaceAttributes.name}`
       ),
       dom.DeclarationFlags.None
     );
@@ -132,6 +131,13 @@ export class TypingsGenerator {
     );
     nsXrm.members.push(typeEntity);
     nsXrm.members.push(interfaceEventContext);
+
+    const interfaceAttributeMap = dom.create.interface(
+      `${pascalizedEntityName}AttributeMap`
+    );
+    const interfaceControlMap = dom.create.interface(
+      `${pascalizedEntityName}ControlMap`
+    );
 
     attributes
       .sort(this.sortAttributes)
@@ -143,7 +149,7 @@ export class TypingsGenerator {
       )
       .forEach((a) => {
         if (a.AttributeType === "Picklist") {
-          // Add an interface attribute with the specialised setValue and getValue methods
+          // Add an interface with the specialised setValue and getValue methods
           const choiceInterface = this.createOptionSetInterface(
             a,
             entityLogicalName
@@ -152,26 +158,51 @@ export class TypingsGenerator {
           const addInterface = dom.create.interface(choiceInterface.name);
           addInterface.members = choiceInterface.members;
           nsXrm.members.push(addInterface);
-
-          interfaceAttributes.members.push(
-            this.createOptionSetAttributeMethod(a)
-          );
-        } else {
-          interfaceAttributes.members.push(this.createAttributeMethod(a));
         }
+        interfaceAttributeMap.members.push(this.createAttributeMapProperty(a));
+        interfaceControlMap.members.push(this.createControlMapProperty(a));
       });
 
-    attributes
-      .sort(this.sortAttributes)
-      .filter(
-        (a) =>
-          a.AttributeType !== "Virtual" &&
-          a.IsCustomizable.Value &&
-          !a.LogicalName.endsWith("_base")
-      )
-      .forEach((a) => {
-        interfaceAttributes.members.push(this.createControlMethod(a));
-      });
+    const attrMapName = `${pascalizedEntityName}AttributeMap`;
+    const ctrlMapName = `${pascalizedEntityName}ControlMap`;
+
+    const getAttrNameParam = dom.create.parameter(
+      "name",
+      dom.create.namedTypeReference("K")
+    );
+    const getAttrMethod = dom.create.method(
+      "getAttribute",
+      [getAttrNameParam],
+      dom.create.namedTypeReference(`${attrMapName}[K]`)
+    );
+    getAttrMethod.typeParameters = [
+      dom.create.typeParameter(
+        "K",
+        dom.create.namedTypeReference(`keyof ${attrMapName}`)
+      ),
+    ];
+
+    const getCtrlNameParam = dom.create.parameter(
+      "name",
+      dom.create.namedTypeReference("K")
+    );
+    const getCtrlMethod = dom.create.method(
+      "getControl",
+      [getCtrlNameParam],
+      dom.create.namedTypeReference(`${ctrlMapName}[K]`)
+    );
+    getCtrlMethod.typeParameters = [
+      dom.create.typeParameter(
+        "K",
+        dom.create.namedTypeReference(`keyof ${ctrlMapName}`)
+      ),
+    ];
+
+    interfaceAttributes.members.push(getAttrMethod);
+    interfaceAttributes.members.push(getCtrlMethod);
+
+    nsXrm.members.push(interfaceAttributeMap);
+    nsXrm.members.push(interfaceControlMap);
     nsXrm.members.push(interfaceAttributes);
 
     const pickistColumns = attributes
@@ -359,32 +390,19 @@ export class TypingsGenerator {
     );
   }
 
-  private createAttributeMethod(
+  private createAttributeMapProperty(
     attr: IAttributeDefinition
-  ): dom.MethodDeclaration {
-    const logicalNameParam = dom.create.parameter(
-      "name",
-      dom.type.stringLiteral(camelize(attr.LogicalName))
-    );
-    const returnType = dom.create.namedTypeReference(
-      attributeTypeDefMap.get(attr.AttributeType) || xrmAttribute
-    );
-
-    return dom.create.method("getAttribute", [logicalNameParam], returnType);
-  }
-
-  private createOptionSetAttributeMethod(
-    attr: IAttributeDefinition
-  ): dom.MethodDeclaration {
-    const logicalNameParam = dom.create.parameter(
-      "name",
-      dom.type.stringLiteral(camelize(attr.LogicalName))
-    );
-    const returnType = dom.create.namedTypeReference(
-      `Omit<Attributes.OptionSetAttribute, "setValue" | "getValue"> & ${attr.LogicalName}_Options`
-    );
-
-    return dom.create.method("getAttribute", [logicalNameParam], returnType);
+  ): dom.PropertyDeclaration {
+    const propName = camelize(attr.LogicalName);
+    const type =
+      attr.AttributeType === "Picklist"
+        ? dom.create.namedTypeReference(
+            `Omit<Attributes.OptionSetAttribute, "setValue" | "getValue"> & ${attr.LogicalName}_Options`
+          )
+        : dom.create.namedTypeReference(
+            attributeTypeDefMap.get(attr.AttributeType) || xrmAttribute
+          );
+    return dom.create.property(propName, type);
   }
 
   private createOptionSetInterface(
@@ -420,18 +438,14 @@ export class TypingsGenerator {
     return choiceInterface;
   }
 
-  private createControlMethod(
+  private createControlMapProperty(
     attr: IAttributeDefinition
-  ): dom.MethodDeclaration {
-    const logicalNameParam = dom.create.parameter(
-      "name",
-      dom.type.stringLiteral(camelize(attr.LogicalName))
-    );
-    const returnType = dom.create.namedTypeReference(
+  ): dom.PropertyDeclaration {
+    const propName = camelize(attr.LogicalName);
+    const type = dom.create.namedTypeReference(
       controlTypeDefMap.get(attr.AttributeType) || xrmControl
     );
-
-    return dom.create.method("getControl", [logicalNameParam], returnType);
+    return dom.create.property(propName, type);
   }
 
   private createAttributeEnum(
